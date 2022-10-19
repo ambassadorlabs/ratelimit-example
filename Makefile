@@ -14,12 +14,11 @@ proto-gen:
 ## builds locally and copies into distroless container server runs on port 8080
 build-image:
 	GOOS=linux GOARCH=amd64 go build -o ratelimit-example server/main.go 
-	docker build -t ratelimit-example:latest .
+	docker build -t danielbryantuk/ratelimit-example:v4 .
 
 ## build, re-tag as #v3 and push container
 docker-push:
-	docker tag ratelimit-example:latest emissaryingress/ratelimit-example:v3
-	docker push emissaryingress/ratelimit-example:v3
+	docker push danielbryantuk/ratelimit-example:v4
 
 ## applies the necessary yaml to setup ratelimit service
 apply-yaml:

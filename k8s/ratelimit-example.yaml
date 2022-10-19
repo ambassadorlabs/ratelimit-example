@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: ratelimit-example
-        image: docker.io/emissaryingress/ratelimit-example:v3
+        image: docker.io/danielbryantuk/ratelimit-example:v4
         imagePullPolicy: Always
         ports:
           - name: http
