@@ -44,6 +44,6 @@ func run() error {
 		}
 
 		fmt.Printf("Ratelimit code applied is: %v\n", resp.GetOverallCode().String())
-		time.Sleep(2 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 }

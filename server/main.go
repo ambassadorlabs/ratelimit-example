@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
+	// "math"
 	"net"
+	"time"
+	"github.com/honeycombio/leakybucket"
 
 	// This import path is based on the name declaration in the go.mod,
 	// and the gen/proto/go output location in the buf.gen.yaml.
@@ -15,7 +17,15 @@ import (
 	"google.golang.org/grpc"
 )
 
+var bucket leakybucket.Bucket
+
 func main() {
+	bucket = leakybucket.Bucket{
+		Capacity:    1,
+		DrainAmount: 1,
+		DrainPeriod: time.Second,
+	}
+
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
@@ -64,19 +74,15 @@ func (rls *rateLimitServer) ShouldRateLimit(ctx context.Context, request *rateli
 			if entry.Key == "x-emissary-test-allow" && entry.Value == "true" {
 				allow = true
 				break
-			}
+			}		
 		}
+	}
 
-		status := &ratelimitv3.RateLimitResponse_DescriptorStatus{
-			Code: ratelimitv3.RateLimitResponse_OK,
-			CurrentLimit: &ratelimitv3.RateLimitResponse_RateLimit{
-				RequestsPerUnit: 1000,
-				Unit:            ratelimitv3.RateLimitResponse_RateLimit_SECOND,
-			},
-			LimitRemaining: math.MaxUint32,
-		}
-
-		response.Statuses = append(response.Statuses, status)
+	if err := bucket.Add(); err == nil {
+		fmt.Println("Bucket add true")
+		allow = true
+	} else {
+		fmt.Println("Bucket add false")
 	}
 
 	if allow {
@@ -85,6 +91,7 @@ func (rls *rateLimitServer) ShouldRateLimit(ctx context.Context, request *rateli
 		response.OverallCode = ratelimitv3.RateLimitResponse_OVER_LIMIT
 	}
 	fmt.Println("<========")
+	fmt.Println(response.OverallCode)
 	//TODO: print debug json output for debugging
 	return response, nil
 }
