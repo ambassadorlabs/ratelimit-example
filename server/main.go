@@ -22,7 +22,7 @@ var bucket leakybucket.Bucket
 func main() {
 	bucket = leakybucket.Bucket{
 		Capacity:    1,
-		DrainAmount: 1,
+		DrainAmount: 8,
 		DrainPeriod: time.Second,
 	}
 
